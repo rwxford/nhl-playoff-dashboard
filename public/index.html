@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2026 Stanley Cup Playoffs — LIVE Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- ═══════════════════════════════════════════════════════════════
+       HEADER
+       ═══════════════════════════════════════════════════════════════ -->
+  <header id="dashboard-header">
+    <div class="header-inner">
+      <div class="header-title">
+        <span id="live-dot" class="live-dot" aria-label="Live indicator"></span>
+        <h1>2026 Stanley Cup Playoffs <span class="header-accent">— LIVE Dashboard</span></h1>
+      </div>
+      <div class="header-controls">
+        <button id="notification-toggle" class="btn-notify" aria-label="Toggle notifications">
+          <svg class="icon-bell" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+          <span id="notify-label">Notifications ON</span>
+        </button>
+        <div id="last-updated" class="last-updated">Last updated: —</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       LIVE SCORES TICKER
+       ═══════════════════════════════════════════════════════════════ -->
+  <nav id="score-ticker" class="score-ticker" aria-label="Live scores ticker">
+    <div id="ticker-content" class="ticker-content">
+      <div class="ticker-placeholder">Waiting for live game data&hellip;</div>
+    </div>
+  </nav>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       MAIN LAYOUT: Bracket + Sidebar
+       ═══════════════════════════════════════════════════════════════ -->
+  <main id="main" class="main-layout">
+    <!-- ── BRACKET ────────────────────────────────────────────── -->
+    <section id="bracket-section" class="bracket-section" aria-label="Playoff bracket">
+      <h2 class="section-title">Playoff Bracket</h2>
+
+      <!-- EASTERN CONFERENCE -->
+      <h3 class="conf-label conf-east">Eastern Conference</h3>
+      <div id="bracket-east" class="bracket-grid" data-conference="east">
+        <!-- Round 1 -->
+        <div class="bracket-round" data-round="1">
+          <h4 class="round-label">Round 1</h4>
+          <div id="east-r1-s1" class="series-slot" data-series="east-r1-1"></div>
+          <div id="east-r1-s2" class="series-slot" data-series="east-r1-2"></div>
+          <div id="east-r1-s3" class="series-slot" data-series="east-r1-3"></div>
+          <div id="east-r1-s4" class="series-slot" data-series="east-r1-4"></div>
+        </div>
+        <!-- Round 2 -->
+        <div class="bracket-round" data-round="2">
+          <h4 class="round-label">Round 2</h4>
+          <div class="connector-group">
+            <div class="connector connector-top"></div>
+            <div class="connector connector-bottom"></div>
+          </div>
+          <div id="east-r2-s1" class="series-slot" data-series="east-r2-1"></div>
+          <div class="connector-group">
+            <div class="connector connector-top"></div>
+            <div class="connector connector-bottom"></div>
+          </div>
+          <div id="east-r2-s2" class="series-slot" data-series="east-r2-2"></div>
+        </div>
+        <!-- Conference Finals -->
+        <div class="bracket-round" data-round="3">
+          <h4 class="round-label">Conf. Finals</h4>
+          <div class="connector-group">
+            <div class="connector connector-top"></div>
+            <div class="connector connector-bottom"></div>
+          </div>
+          <div id="east-r3-s1" class="series-slot" data-series="east-r3-1"></div>
+        </div>
+      </div>
+
+      <!-- STANLEY CUP FINAL -->
+      <div id="bracket-final" class="bracket-final">
+        <div class="bracket-round" data-round="4">
+          <h4 class="round-label">Stanley Cup Final</h4>
+          <div class="connector-group connector-final">
+            <div class="connector connector-left"></div>
+            <div class="connector connector-right"></div>
+          </div>
+          <div id="final-s1" class="series-slot series-slot-final" data-series="final"></div>
+        </div>
+      </div>
+
+      <!-- WESTERN CONFERENCE -->
+      <h3 class="conf-label conf-west">Western Conference</h3>
+      <div id="bracket-west" class="bracket-grid" data-conference="west">
+        <!-- Conference Finals -->
+        <div class="bracket-round" data-round="3">
+          <h4 class="round-label">Conf. Finals</h4>
+          <div id="west-r3-s1" class="series-slot" data-series="west-r3-1"></div>
+          <div class="connector-group">
+            <div class="connector connector-top"></div>
+            <div class="connector connector-bottom"></div>
+          </div>
+        </div>
+        <!-- Round 2 -->
+        <div class="bracket-round" data-round="2">
+          <h4 class="round-label">Round 2</h4>
+          <div id="west-r2-s1" class="series-slot" data-series="west-r2-1"></div>
+          <div class="connector-group">
+            <div class="connector connector-top"></div>
+            <div class="connector connector-bottom"></div>
+          </div>
+          <div id="west-r2-s2" class="series-slot" data-series="west-r2-2"></div>
+          <div class="connector-group">
+            <div class="connector connector-top"></div>
+            <div class="connector connector-bottom"></div>
+          </div>
+        </div>
+        <!-- Round 1 -->
+        <div class="bracket-round" data-round="1">
+          <h4 class="round-label">Round 1</h4>
+          <div id="west-r1-s1" class="series-slot" data-series="west-r1-1"></div>
+          <div id="west-r1-s2" class="series-slot" data-series="west-r1-2"></div>
+          <div id="west-r1-s3" class="series-slot" data-series="west-r1-3"></div>
+          <div id="west-r1-s4" class="series-slot" data-series="west-r1-4"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SIDEBAR ────────────────────────────────────────────── -->
+    <aside id="sidebar" class="sidebar">
+      <!-- Predictions Panel -->
+      <section id="predictions-panel" class="panel predictions-panel" aria-label="Series predictions">
+        <h2 class="section-title">AI Predictions</h2>
+        <div id="predictions-content" class="predictions-content">
+          <div class="placeholder-msg">Loading predictions&hellip;</div>
+        </div>
+      </section>
+
+      <!-- Joe B Commentary Feed -->
+      <section id="commentary-panel" class="panel commentary-panel" aria-label="Joe B commentary feed">
+        <h2 class="section-title commentary-title">
+          <span class="title-icon">🎙</span> Joe B Commentary Feed
+        </h2>
+        <div id="commentary-feed" class="commentary-feed">
+          <div class="placeholder-msg commentary-placeholder">Waiting for play-by-play&hellip;</div>
+        </div>
+      </section>
+    </aside>
+  </main>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       FOOTER
+       ═══════════════════════════════════════════════════════════════ -->
+  <footer id="dashboard-footer" class="dashboard-footer">
+    <p>NHL Playoff Dashboard &copy; 2026 &mdash; Data refreshes every 30 s</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

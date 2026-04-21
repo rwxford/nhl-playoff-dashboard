@@ -1,0 +1,21 @@
+{
+  "name": "nhl-playoff-dashboard",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Live NHL Playoff Dashboard with multi-LLM predictions and Joe Beninati commentary",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js"
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "ws": "^8.18.0",
+    "dotenv": "^16.4.0",
+    "node-notifier": "^10.0.1",
+    "openai": "^4.70.0",
+    "@anthropic-ai/sdk": "^0.30.0",
+    "@google/generative-ai": "^0.21.0",
+    "node-fetch": "^3.3.2"
+  }
+}
