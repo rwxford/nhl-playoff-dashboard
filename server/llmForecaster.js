@@ -232,6 +232,70 @@ async function queryGemini(seriesContext) {
   }
 }
 
+// ── Stats-based fallback predictor (no API keys needed) ────────────────
+
+/**
+ * Generate a prediction purely from regular-season stats when LLM APIs are
+ * unavailable.  Uses points, goal differential, and current series score to
+ * produce a reasonable pick.
+ */
+function statsFallbackPredict(series) {
+  const topAbbrev = series.topSeed?.abbrev;
+  const botAbbrev = series.bottomSeed?.abbrev;
+  const topData = TEAM_DATA[topAbbrev] || {};
+  const botData = TEAM_DATA[botAbbrev] || {};
+
+  const topPts = topData.points || 80;
+  const botPts = botData.points || 80;
+  const topGD  = parseInt(String(topData.gd).replace('+', '')) || 0;
+  const botGD  = parseInt(String(botData.gd).replace('+', '')) || 0;
+
+  // Composite score: 60% points, 40% goal differential (normalized to ~100 scale)
+  const topScore = topPts * 0.6 + (topGD + 100) * 0.4;
+  const botScore = botPts * 0.6 + (botGD + 100) * 0.4;
+
+  // Factor in current series wins
+  const topWins = series.topSeed?.wins || 0;
+  const botWins = series.bottomSeed?.wins || 0;
+  const seriesBonus = (topWins - botWins) * 3; // each win gap adds weight
+
+  const adjustedTop = topScore + seriesBonus;
+  const adjustedBot = botScore - seriesBonus;
+
+  const total = adjustedTop + adjustedBot;
+  const topProb = adjustedTop / total;
+
+  const isTopWinner = topProb >= 0.5;
+  const winnerAbbrev = isTopWinner ? topAbbrev : botAbbrev;
+  const confidence = isTopWinner ? topProb : (1 - topProb);
+
+  // Estimate games: bigger gap = fewer games
+  const gap = Math.abs(topProb - 0.5);
+  let games;
+  if (gap > 0.15) games = 4 + Math.max(topWins, botWins);
+  else if (gap > 0.08) games = 5 + Math.min(topWins, botWins);
+  else games = 6 + Math.min(1, Math.min(topWins, botWins));
+  games = Math.max(4, Math.min(7, games));
+
+  // MVP: pick first name from winner's key players
+  const winnerData = isTopWinner ? topData : botData;
+  const mvpMatch = (winnerData.key || '').match(/^([^(,]+)/);
+  const mvp = mvpMatch ? mvpMatch[1].trim() : 'Unknown';
+
+  const reasoning = `${winnerAbbrev} has ${isTopWinner ? topData.points : botData.points} pts and ${isTopWinner ? topData.gd : botData.gd} GD — statistical edge based on regular season performance.`;
+
+  return {
+    provider: 'stats-model',
+    model: 'stats-fallback-v1',
+    winner: winnerAbbrev,
+    games,
+    confidence: Math.round(confidence * 100) / 100,
+    reasoning,
+    mvp,
+    fallback: false, // this IS a valid prediction, not a failure
+  };
+}
+
 // ── Consensus aggregation ───────────────────────────────────────────────
 
 /**
@@ -322,7 +386,17 @@ export async function generateForecasts(allSeries) {
         queryGemini(context),
       ]);
 
-      const predictions = [openaiResult, claudeResult, geminiResult];
+      let predictions = [openaiResult, claudeResult, geminiResult];
+
+      // If ALL LLMs failed, inject a stats-based fallback so the dashboard
+      // always shows meaningful predictions even without API keys.
+      const allFailed = predictions.every((p) => !p.winner);
+      if (allFailed) {
+        const statsPick = statsFallbackPredict(series);
+        predictions = [statsPick, ...predictions];
+        log(`All LLMs failed for ${series.topSeed?.abbrev}-${series.bottomSeed?.abbrev} — using stats fallback → ${statsPick.winner} in ${statsPick.games}`);
+      }
+
       const consensus = buildConsensus(predictions);
 
       const seriesId =
